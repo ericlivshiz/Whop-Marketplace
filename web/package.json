@@ -6,6 +6,7 @@
     "dev": "npm-run-all --parallel dev:next dev:convex",
     "dev:next": "next dev",
     "dev:convex": "convex dev",
+    "convex:migrate-applications": "convex run migrations:stripLegacyApplicationFields",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

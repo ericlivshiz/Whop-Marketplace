@@ -1,8 +1,10 @@
 "use client";
 
+import { WhopLogo } from "@/components/whop-logo";
 import { authClient } from "@/lib/auth-client";
+import { syncAuthenticatedSession } from "@/lib/auth-session";
+import { useAuthGuard } from "@/hooks/use-auth-guard";
 import {
-	Badge,
 	Button,
 	Callout,
 	Card,
@@ -13,7 +15,7 @@ import {
 	TextField,
 } from "@whop/react/components";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useState } from "react";
 
 type AuthTab = "login" | "signup";
 
@@ -64,7 +66,16 @@ function AuthForms() {
 			return;
 		}
 
-		router.refresh();
+		try {
+			await syncAuthenticatedSession();
+			router.replace("/dashboard");
+		} catch (err) {
+			setError(
+				err instanceof Error
+					? err.message
+					: "Unable to confirm your session. Please try again.",
+			);
+		}
 	}
 
 	async function handleSignUp(event: FormEvent<HTMLFormElement>) {
@@ -90,18 +101,24 @@ function AuthForms() {
 			return;
 		}
 
-		router.push("/dashboard");
-		router.refresh();
+		try {
+			await syncAuthenticatedSession();
+			router.replace("/dashboard");
+		} catch (err) {
+			setError(
+				err instanceof Error
+					? err.message
+					: "Unable to confirm your session. Please try again.",
+			);
+		}
 	}
 
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center p-6">
 			<Card size="3" variant="surface" className="w-full max-w-md">
 				<div className="flex flex-col gap-5">
-					<div className="flex flex-col gap-2 text-center">
-						<Badge color="blue" variant="soft" className="self-center">
-							Whop Tasks
-						</Badge>
+					<div className="flex flex-col items-center gap-3 text-center">
+						<WhopLogo className="h-16 w-16 rounded-xl" />
 						<Heading size="6">Welcome to Whop Tasks</Heading>
 						<Text size="3" color="gray">
 							Sign in to post tasks, apply for work, and manage your
@@ -228,16 +245,9 @@ function AuthForms() {
 }
 
 export function AuthPage() {
-	const router = useRouter();
-	const { data: session, isPending } = authClient.useSession();
+	const { isSettling, isLoggedIn } = useAuthGuard("require-guest");
 
-	useEffect(() => {
-		if (!isPending && session?.user) {
-			router.replace("/dashboard");
-		}
-	}, [isPending, session?.user, router]);
-
-	if (isPending || session?.user) {
+	if (isSettling || isLoggedIn) {
 		return (
 			<div className="flex min-h-screen flex-col items-center justify-center gap-3 p-6">
 				<Spinner size="3" />

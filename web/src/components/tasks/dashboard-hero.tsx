@@ -1,5 +1,6 @@
 "use client";
 
+import { WhopLogo } from "@/components/whop-logo";
 import { Button, Heading, Text } from "@whop/react/components";
 import Link from "next/link";
 
@@ -7,6 +8,10 @@ export function DashboardHero() {
 	return (
 		<section className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center px-4 py-16 text-center sm:min-h-[calc(100vh-7rem)] sm:py-24">
 			<div className="flex max-w-3xl flex-col items-center gap-5 sm:gap-6">
+				<WhopLogo
+					priority
+					className="h-24 w-24 sm:h-32 sm:w-32"
+				/>
 				<Heading size="9" className="tracking-tight leading-[1.05]">
 					Post work. Pick it up. Get paid on Whop.
 				</Heading>
