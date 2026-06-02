@@ -1,15 +1,15 @@
 "use client";
 
 import { AppShell } from "@/components/tasks/app-shell";
-import { TASK_CATEGORIES } from "@/lib/tasks/mock-data";
+import { TASK_CATEGORY_OPTIONS } from "@/lib/tasks/mock-data";
 import type { TaskCategory } from "@/lib/tasks/types";
 import { api } from "@convex/_generated/api";
 import {
 	Button,
 	Callout,
 	Card,
+	FilterChip,
 	Heading,
-	Select,
 	Text,
 	TextArea,
 	TextField,
@@ -29,7 +29,7 @@ function FormField({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="flex flex-col gap-1.5">
+		<div className="flex flex-col gap-2">
 			<Text as="label" htmlFor={id} size="2" weight="medium">
 				{label}
 			</Text>
@@ -79,19 +79,24 @@ export function PostTaskForm() {
 		}
 	}
 
-	const categoryOptions = TASK_CATEGORIES.filter(
-		(item) => item.value !== "all",
-	);
-
 	return (
 		<AppShell>
-			<div className="mx-auto flex max-w-xl flex-col gap-6">
-				<div className="flex flex-col gap-2">
-					<Heading size="6">Post a task</Heading>
-					<Text size="3" color="gray">
-						Describe what you need done. Buyers on Whop Tasks can apply
-						when you wire up payments.
-					</Text>
+			<div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
+				<div className="flex items-start justify-between gap-4">
+					<div className="flex min-w-0 flex-col gap-1.5">
+						<Heading size="7" className="tracking-tight">
+							Post a task
+						</Heading>
+						<Text size="3" color="gray" className="max-w-md leading-relaxed">
+							List what you need done. Members can browse and apply
+							right away.
+						</Text>
+					</div>
+					<Link href="/browse" className="shrink-0 pt-1">
+						<Button size="1" variant="ghost" color="gray">
+							← Back
+						</Button>
+					</Link>
 				</div>
 
 				{error ? (
@@ -100,101 +105,113 @@ export function PostTaskForm() {
 					</Callout.Root>
 				) : null}
 
-				<Card size="3" variant="surface">
-					<form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-						<FormField label="Title" id="task-title">
-							<TextField.Root size="2" variant="surface">
-								<TextField.Input
-									id="task-title"
-									name="title"
-									placeholder="e.g. Design launch graphics"
-									required
-									disabled={isSubmitting}
-								/>
-							</TextField.Root>
-						</FormField>
+				<Card size="3" variant="surface" className="overflow-hidden p-0">
+					<form onSubmit={handleSubmit}>
+						<div className="grid gap-5 p-5 md:grid-cols-[1fr_272px] md:gap-6 md:p-6">
+							<div className="flex flex-col gap-4">
+								<FormField label="Title" id="task-title">
+									<TextField.Root size="3" variant="surface">
+										<TextField.Input
+											id="task-title"
+											name="title"
+											placeholder="e.g. Design launch graphics for Instagram"
+											required
+											disabled={isSubmitting}
+										/>
+									</TextField.Root>
+								</FormField>
 
-						<FormField label="Description" id="task-description">
-							<TextArea
-								id="task-description"
-								name="description"
-								size="2"
-								variant="surface"
-								placeholder="Scope, deliverables, and any links…"
-								rows={5}
-								required
-								disabled={isSubmitting}
-							/>
-						</FormField>
-
-						<div className="grid gap-4 sm:grid-cols-2">
-							<FormField label="Category" id="task-category">
-								<Select.Root
-									size="2"
-									value={category}
-									onValueChange={(value) =>
-										setCategory(value as TaskCategory)
-									}
-									disabled={isSubmitting}
-								>
-									<Select.Trigger id="task-category" variant="surface" />
-									<Select.Content>
-										{categoryOptions.map((item) => (
-											<Select.Item key={item.value} value={item.value}>
-												{item.label}
-											</Select.Item>
-										))}
-									</Select.Content>
-								</Select.Root>
-							</FormField>
-
-							<FormField label="Budget (USD)" id="task-budget">
-								<TextField.Root size="2" variant="surface">
-									<TextField.Slot>
-										<Text size="2" color="gray">
-											$
-										</Text>
-									</TextField.Slot>
-									<TextField.Input
-										id="task-budget"
-										name="budget"
-										type="number"
-										min={1}
-										placeholder="250"
+								<FormField label="Description" id="task-description">
+									<TextArea
+										id="task-description"
+										name="description"
+										size="3"
+										variant="surface"
+										placeholder="Scope, deliverables, and any links…"
+										rows={5}
 										required
 										disabled={isSubmitting}
+										className="min-h-[120px] resize-y"
 									/>
-								</TextField.Root>
-							</FormField>
+								</FormField>
+							</div>
+
+							<div className="flex flex-col gap-4">
+								<FormField label="Category" id="task-category">
+									<div
+										className="flex flex-wrap gap-2"
+										role="group"
+										aria-labelledby="task-category"
+									>
+										{TASK_CATEGORY_OPTIONS.map((item) => (
+											<FilterChip
+												key={item.value}
+												checked={category === item.value}
+												onCheckedChange={() =>
+													setCategory(item.value)
+												}
+												disabled={isSubmitting}
+											>
+												{item.label}
+											</FilterChip>
+										))}
+									</div>
+								</FormField>
+
+								<FormField label="Budget (USD)" id="task-budget">
+									<TextField.Root size="3" variant="surface">
+										<TextField.Slot>
+											<Text size="2" color="gray">
+												$
+											</Text>
+										</TextField.Slot>
+										<TextField.Input
+											id="task-budget"
+											name="budget"
+											type="number"
+											min={1}
+											placeholder="250"
+											required
+											disabled={isSubmitting}
+										/>
+									</TextField.Root>
+								</FormField>
+
+								<FormField label="Deadline" id="task-deadline">
+									<TextField.Root size="3" variant="surface">
+										<TextField.Input
+											id="task-deadline"
+											name="deadline"
+											type="date"
+											required
+											disabled={isSubmitting}
+										/>
+									</TextField.Root>
+								</FormField>
+							</div>
 						</div>
 
-						<FormField label="Deadline" id="task-deadline">
-							<TextField.Root size="2" variant="surface">
-								<TextField.Input
-									id="task-deadline"
-									name="deadline"
-									type="date"
-									required
+						<div className="flex items-center justify-between gap-3 border-t border-gray-6 bg-gray-2 px-5 py-4 md:px-6">
+							<Link href="/browse">
+								<Button
+									type="button"
+									size="2"
+									variant="ghost"
+									color="gray"
 									disabled={isSubmitting}
-								/>
-							</TextField.Root>
-						</FormField>
-
-						<div className="flex flex-wrap gap-2 pt-2">
+								>
+									Cancel
+								</Button>
+							</Link>
 							<Button
 								type="submit"
-								size="2"
+								size="3"
 								variant="solid"
 								color="blue"
 								disabled={isSubmitting}
 							>
 								{isSubmitting ? "Publishing…" : "Publish task"}
 							</Button>
-							<Link href="/dashboard">
-								<Button type="button" size="2" variant="soft" color="gray">
-									Cancel
-								</Button>
-							</Link>
 						</div>
 					</form>
 				</Card>

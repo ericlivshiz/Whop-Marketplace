@@ -118,7 +118,7 @@ export function TaskDetailView({ taskId }: { taskId: Id<"tasks"> }) {
 	return (
 		<AppShell>
 			<div className="flex flex-col gap-6">
-				<Link href="/dashboard">
+				<Link href="/browse">
 					<Button size="1" variant="ghost" color="gray" className="-ml-2 w-fit">
 						← Back to tasks
 					</Button>

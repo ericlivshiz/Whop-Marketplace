@@ -14,9 +14,20 @@ const CATEGORY_COLORS: Record<
 	other: "gray",
 };
 
-export function CategoryBadge({ category }: { category: TaskCategory }) {
+export function CategoryBadge({
+	category,
+	className,
+}: {
+	category: TaskCategory;
+	className?: string;
+}) {
 	return (
-		<Badge color={CATEGORY_COLORS[category]} variant="soft" size="1">
+		<Badge
+			color={CATEGORY_COLORS[category]}
+			variant="soft"
+			size="1"
+			className={className}
+		>
 			{getCategoryLabel(category)}
 		</Badge>
 	);

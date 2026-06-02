@@ -5,10 +5,10 @@ import { TASK_CATEGORIES } from "@/lib/tasks/mock-data";
 import type { TaskCategory } from "@/lib/tasks/types";
 import { api } from "@convex/_generated/api";
 import {
-	Badge,
 	Button,
 	FilterChip,
 	Heading,
+	IconButton,
 	Spinner,
 	Text,
 	TextField,
@@ -42,50 +42,54 @@ export function BrowseMarketplace() {
 		});
 	}, [category, query, tasks]);
 
-	return (
-		<div className="flex flex-col gap-8">
-			<section className="relative overflow-hidden rounded-2xl border border-blue-6 bg-gradient-to-br from-blue-2 via-gray-2 to-gray-3 p-6 sm:p-8">
-				<div className="relative z-10 flex max-w-xl flex-col gap-4">
-					<Badge color="blue" variant="soft" className="w-fit">
-						Two-sided marketplace
-					</Badge>
-					<Heading size="7">
-						Post work. Pick it up. Get paid on Whop.
-					</Heading>
-					<Text size="3" color="gray">
-						Whop Tasks connects creators who need help with members who
-						want to sell their skills — design, dev, marketing, and more.
-					</Text>
-					<div className="flex flex-wrap gap-2 pt-1">
-						<Link href="/tasks/new">
-							<Button size="2" variant="solid" color="blue">
-								Post a task
-							</Button>
-						</Link>
-						<Button size="2" variant="soft" color="gray" disabled>
-							How it works
-						</Button>
-					</div>
-				</div>
-				<div
-					className="pointer-events-none absolute -right-8 -top-8 size-48 rounded-full bg-blue-4 opacity-60 blur-3xl"
-					aria-hidden
-				/>
-			</section>
+	const hasQuery = query.trim().length > 0;
+	const resultCount = filteredTasks.length;
 
-			<section className="flex flex-col gap-4">
-				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-					<Heading size="5">Open tasks</Heading>
-					<TextField.Root size="2" variant="surface" className="w-full sm:max-w-xs">
-						<TextField.Slot>
+	return (
+		<div className="flex flex-col gap-6">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+				<div>
+					<Heading size="6">Open tasks</Heading>
+					<Text size="2" color="gray" className="mt-1">
+						Find work that matches your skills.
+					</Text>
+				</div>
+				<Link href="/tasks/new" className="shrink-0">
+					<Button size="2" variant="soft" color="blue">
+						Post a task
+					</Button>
+				</Link>
+			</div>
+
+			<div className="rounded-2xl border border-gray-6 bg-gray-2 p-4 sm:p-5">
+				<div className="flex flex-col gap-4">
+					<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+						<Text size="2" weight="medium">
+							Search
+						</Text>
+						{tasks !== undefined ? (
+							<Text size="1" color="gray">
+								{resultCount === 1
+									? "1 task"
+									: `${resultCount} tasks`}
+								{hasQuery || category !== "all" ? " matching" : " open"}
+							</Text>
+						) : null}
+					</div>
+
+					<TextField.Root
+						size="3"
+						variant="surface"
+						className="w-full rounded-xl border-gray-6 bg-gray-1 shadow-sm transition-[box-shadow,border-color] focus-within:border-blue-7 focus-within:ring-2 focus-within:ring-blue-4"
+					>
+						<TextField.Slot className="pl-[7px] text-gray-9">
 							<svg
-								width="14"
-								height="14"
+								width="18"
+								height="18"
 								viewBox="0 0 24 24"
 								fill="none"
 								stroke="currentColor"
 								strokeWidth="2"
-								className="text-gray-9"
 								aria-hidden
 							>
 								<circle cx="11" cy="11" r="7" />
@@ -93,44 +97,73 @@ export function BrowseMarketplace() {
 							</svg>
 						</TextField.Slot>
 						<TextField.Input
-							placeholder="Search tasks…"
+							placeholder="Search by title, description, or seller…"
 							value={query}
 							onChange={(event) => setQuery(event.target.value)}
+							className="placeholder:text-gray-9"
 						/>
+						{hasQuery ? (
+							<TextField.Slot className="pr-1">
+								<IconButton
+									size="2"
+									variant="ghost"
+									color="gray"
+									aria-label="Clear search"
+									onClick={() => setQuery("")}
+								>
+									<svg
+										width="14"
+										height="14"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										aria-hidden
+									>
+										<path d="M18 6L6 18M6 6l12 12" />
+									</svg>
+								</IconButton>
+							</TextField.Slot>
+						) : null}
 					</TextField.Root>
-				</div>
 
-				<div className="flex flex-wrap gap-2">
-					{TASK_CATEGORIES.map((item) => (
-						<FilterChip
-							key={item.value}
-							checked={category === item.value}
-							onCheckedChange={() => setCategory(item.value)}
-						>
-							{item.label}
-						</FilterChip>
+					<div className="flex flex-col gap-2.5 border-t border-gray-6 pt-4">
+						<Text size="1" color="gray" weight="medium" className="uppercase tracking-wide">
+							Category
+						</Text>
+						<div className="flex flex-wrap gap-2">
+							{TASK_CATEGORIES.map((item) => (
+								<FilterChip
+									key={item.value}
+									checked={category === item.value}
+									onCheckedChange={() => setCategory(item.value)}
+								>
+									{item.label}
+								</FilterChip>
+							))}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{tasks === undefined ? (
+				<div className="flex justify-center py-12">
+					<Spinner size="3" />
+				</div>
+			) : filteredTasks.length === 0 ? (
+				<div className="rounded-xl border border-dashed border-gray-6 bg-gray-2 px-6 py-12 text-center">
+					<Heading size="4">No tasks match</Heading>
+					<Text size="2" color="gray" className="mt-2">
+						Try a different search or category, or post your own task.
+					</Text>
+				</div>
+			) : (
+				<div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+					{filteredTasks.map((task) => (
+						<TaskCard key={task.id} task={task} />
 					))}
 				</div>
-
-				{tasks === undefined ? (
-					<div className="flex justify-center py-12">
-						<Spinner size="3" />
-					</div>
-				) : filteredTasks.length === 0 ? (
-					<div className="rounded-xl border border-dashed border-gray-6 bg-gray-2 px-6 py-12 text-center">
-						<Heading size="4">No tasks match</Heading>
-						<Text size="2" color="gray" className="mt-2">
-							Try a different search or category, or post your own task.
-						</Text>
-					</div>
-				) : (
-					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-						{filteredTasks.map((task) => (
-							<TaskCard key={task.id} task={task} />
-						))}
-					</div>
-				)}
-			</section>
+			)}
 		</div>
 	);
 }

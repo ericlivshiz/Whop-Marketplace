@@ -10,7 +10,7 @@ export default function TaskNotFound() {
 				<Text size="3" color="gray">
 					This task may have been removed or the link is incorrect.
 				</Text>
-				<Link href="/dashboard">
+				<Link href="/browse">
 					<Button size="2" variant="solid" color="blue">
 						Back to tasks
 					</Button>

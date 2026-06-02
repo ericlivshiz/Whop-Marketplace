@@ -15,7 +15,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 const NAV_ITEMS = [
-	{ href: "/dashboard", label: "Browse" },
+	{ href: "/browse", label: "Browse" },
 	{ href: "/tasks/new", label: "Post task" },
 	{ href: "/my-tasks", label: "My tasks" },
 ] as const;
@@ -82,10 +82,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
 					<nav className="flex flex-1 items-center justify-center gap-1">
 						{NAV_ITEMS.map((item) => {
-							const isActive =
-								item.href === "/dashboard"
-									? pathname === "/dashboard"
-									: pathname.startsWith(item.href);
+							const isActive = pathname.startsWith(item.href);
 
 							return (
 								<Link key={item.href} href={item.href}>
@@ -144,7 +141,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 				</div>
 			</header>
 
-			<main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">{children}</main>
+			<main
+				className={`mx-auto max-w-6xl px-4 sm:px-6 ${pathname.startsWith("/tasks/new") ? "py-6" : "py-8"}`}
+			>
+				{children}
+			</main>
 		</div>
 	);
 }

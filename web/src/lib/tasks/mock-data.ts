@@ -13,6 +13,11 @@ export const TASK_CATEGORIES: {
 	{ value: "other", label: "Other" },
 ];
 
+export const TASK_CATEGORY_OPTIONS = TASK_CATEGORIES.filter(
+	(item): item is { value: TaskCategory; label: string } =>
+		item.value !== "all",
+);
+
 export function getCategoryLabel(category: TaskCategory): string {
 	return (
 		TASK_CATEGORIES.find((item) => item.value === category)?.label ?? category
