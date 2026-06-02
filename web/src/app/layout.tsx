@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Whop Marketplace",
-	description: "Sign in or create an account",
+	title: "Whop Tasks",
+	description: "Post tasks, find work, and get paid in the Whop ecosystem",
 };
 
 export default async function RootLayout({

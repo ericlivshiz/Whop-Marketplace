@@ -12,3 +12,10 @@ body {
 	color: var(--color-foreground);
 	font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
+
+@layer components {
+	button:not(:disabled),
+	[role="button"]:not(:disabled) {
+		@apply hover:cursor-pointer;
+	}
+}

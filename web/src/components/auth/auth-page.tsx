@@ -100,11 +100,12 @@ function AuthForms() {
 				<div className="flex flex-col gap-5">
 					<div className="flex flex-col gap-2 text-center">
 						<Badge color="blue" variant="soft" className="self-center">
-							Whop Marketplace
+							Whop Tasks
 						</Badge>
-						<Heading size="6">Welcome</Heading>
+						<Heading size="6">Welcome to Whop Tasks</Heading>
 						<Text size="3" color="gray">
-							Sign in to your account or create a new one to get started.
+							Sign in to post tasks, apply for work, and manage your
+							marketplace activity.
 						</Text>
 					</div>
 
