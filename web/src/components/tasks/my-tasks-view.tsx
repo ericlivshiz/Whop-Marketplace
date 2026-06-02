@@ -2,25 +2,31 @@
 
 import { AppShell } from "@/components/tasks/app-shell";
 import { TaskCard } from "@/components/tasks/task-card";
-import { MOCK_TASKS } from "@/lib/tasks/mock-data";
+import { api } from "@convex/_generated/api";
 import {
 	Button,
 	Card,
 	Heading,
 	SegmentedControl,
+	Spinner,
 	Text,
 } from "@whop/react/components";
+import { useQuery } from "convex/react";
 import Link from "next/link";
 import { useState } from "react";
 
 type MyTasksTab = "posted" | "applied";
 
-const POSTED_TASKS = MOCK_TASKS.slice(0, 2);
-const APPLIED_TASKS = MOCK_TASKS.slice(2, 4);
-
 export function MyTasksView() {
 	const [tab, setTab] = useState<MyTasksTab>("posted");
-	const tasks = tab === "posted" ? POSTED_TASKS : APPLIED_TASKS;
+	const postedTasks = useQuery(api.tasks.listPostedByMe);
+	const appliedTasks = useQuery(api.applications.listAppliedByMe);
+
+	const isLoading =
+		tab === "posted" ? postedTasks === undefined : appliedTasks === undefined;
+	const tasks = tab === "posted" ? postedTasks : appliedTasks;
+	const postedCount = postedTasks?.length ?? 0;
+	const appliedCount = appliedTasks?.length ?? 0;
 
 	return (
 		<AppShell>
@@ -45,15 +51,19 @@ export function MyTasksView() {
 				>
 					<SegmentedControl.List>
 						<SegmentedControl.Trigger value="posted">
-							Posted ({POSTED_TASKS.length})
+							Posted ({postedCount})
 						</SegmentedControl.Trigger>
 						<SegmentedControl.Trigger value="applied">
-							Applied ({APPLIED_TASKS.length})
+							Applied ({appliedCount})
 						</SegmentedControl.Trigger>
 					</SegmentedControl.List>
 				</SegmentedControl.Root>
 
-				{tasks.length === 0 ? (
+				{isLoading ? (
+					<div className="flex justify-center py-12">
+						<Spinner size="3" />
+					</div>
+				) : !tasks || tasks.length === 0 ? (
 					<Card size="3" variant="surface" className="py-12 text-center">
 						<Heading size="4">Nothing here yet</Heading>
 						<Text size="2" color="gray" className="mt-2">

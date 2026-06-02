@@ -8,8 +8,14 @@
  * @module
  */
 
+import type * as applications from "../applications.js";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as lib_auth from "../lib/auth.js";
+import type * as lib_taskDto from "../lib/taskDto.js";
+import type * as lib_validators from "../lib/validators.js";
+import type * as seed from "../seed.js";
+import type * as tasks from "../tasks.js";
 
 import type {
   ApiFromModules,
@@ -18,8 +24,14 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  applications: typeof applications;
   auth: typeof auth;
   http: typeof http;
+  "lib/auth": typeof lib_auth;
+  "lib/taskDto": typeof lib_taskDto;
+  "lib/validators": typeof lib_validators;
+  seed: typeof seed;
+  tasks: typeof tasks;
 }>;
 
 /**

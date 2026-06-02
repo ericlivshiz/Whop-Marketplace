@@ -1,27 +1,35 @@
 "use client";
 
 import { TaskCard } from "@/components/tasks/task-card";
-import { MOCK_TASKS, TASK_CATEGORIES } from "@/lib/tasks/mock-data";
+import { TASK_CATEGORIES } from "@/lib/tasks/mock-data";
 import type { TaskCategory } from "@/lib/tasks/types";
+import { api } from "@convex/_generated/api";
 import {
 	Badge,
 	Button,
 	FilterChip,
 	Heading,
+	Spinner,
 	Text,
 	TextField,
 } from "@whop/react/components";
+import { useQuery } from "convex/react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
 export function BrowseMarketplace() {
 	const [query, setQuery] = useState("");
 	const [category, setCategory] = useState<TaskCategory | "all">("all");
+	const tasks = useQuery(api.tasks.listOpen);
 
 	const filteredTasks = useMemo(() => {
+		if (!tasks) {
+			return [];
+		}
+
 		const normalizedQuery = query.trim().toLowerCase();
 
-		return MOCK_TASKS.filter((task) => {
+		return tasks.filter((task) => {
 			const matchesCategory =
 				category === "all" || task.category === category;
 			const matchesQuery =
@@ -32,7 +40,7 @@ export function BrowseMarketplace() {
 
 			return matchesCategory && matchesQuery;
 		});
-	}, [category, query]);
+	}, [category, query, tasks]);
 
 	return (
 		<div className="flex flex-col gap-8">
@@ -104,7 +112,11 @@ export function BrowseMarketplace() {
 					))}
 				</div>
 
-				{filteredTasks.length === 0 ? (
+				{tasks === undefined ? (
+					<div className="flex justify-center py-12">
+						<Spinner size="3" />
+					</div>
+				) : filteredTasks.length === 0 ? (
 					<div className="rounded-xl border border-dashed border-gray-6 bg-gray-2 px-6 py-12 text-center">
 						<Heading size="4">No tasks match</Heading>
 						<Text size="2" color="gray" className="mt-2">

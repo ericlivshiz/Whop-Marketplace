@@ -3,6 +3,7 @@
 import { AppShell } from "@/components/tasks/app-shell";
 import { TASK_CATEGORIES } from "@/lib/tasks/mock-data";
 import type { TaskCategory } from "@/lib/tasks/types";
+import { api } from "@convex/_generated/api";
 import {
 	Button,
 	Callout,
@@ -13,7 +14,9 @@ import {
 	TextArea,
 	TextField,
 } from "@whop/react/components";
+import { useMutation } from "convex/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
 function FormField({
@@ -35,13 +38,45 @@ function FormField({
 	);
 }
 
+function parseDeadlineMs(dateValue: string): number {
+	const [year, month, day] = dateValue.split("-").map(Number);
+	return new Date(year, month - 1, day).getTime();
+}
+
 export function PostTaskForm() {
-	const [submitted, setSubmitted] = useState(false);
+	const router = useRouter();
+	const createTask = useMutation(api.tasks.create);
+	const [error, setError] = useState<string | null>(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [category, setCategory] = useState<TaskCategory>("design");
 
-	function handleSubmit(event: FormEvent<HTMLFormElement>) {
+	async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		setSubmitted(true);
+		setError(null);
+		setIsSubmitting(true);
+
+		const form = event.currentTarget;
+		const formData = new FormData(form);
+		const title = String(formData.get("title") ?? "");
+		const description = String(formData.get("description") ?? "");
+		const budget = Number(formData.get("budget"));
+		const deadlineValue = String(formData.get("deadline") ?? "");
+
+		try {
+			const taskId = await createTask({
+				title,
+				description,
+				category,
+				budget,
+				deadline: parseDeadlineMs(deadlineValue),
+			});
+			router.push(`/tasks/${taskId}`);
+		} catch (err) {
+			setError(
+				err instanceof Error ? err.message : "Failed to publish task",
+			);
+			setIsSubmitting(false);
+		}
 	}
 
 	const categoryOptions = TASK_CATEGORIES.filter(
@@ -59,11 +94,9 @@ export function PostTaskForm() {
 					</Text>
 				</div>
 
-				{submitted ? (
-					<Callout.Root color="green" variant="soft">
-						<Callout.Text>
-							Task saved locally for preview — backend coming soon.
-						</Callout.Text>
+				{error ? (
+					<Callout.Root color="red" variant="soft">
+						<Callout.Text>{error}</Callout.Text>
 					</Callout.Root>
 				) : null}
 
@@ -76,6 +109,7 @@ export function PostTaskForm() {
 									name="title"
 									placeholder="e.g. Design launch graphics"
 									required
+									disabled={isSubmitting}
 								/>
 							</TextField.Root>
 						</FormField>
@@ -89,6 +123,7 @@ export function PostTaskForm() {
 								placeholder="Scope, deliverables, and any links…"
 								rows={5}
 								required
+								disabled={isSubmitting}
 							/>
 						</FormField>
 
@@ -100,6 +135,7 @@ export function PostTaskForm() {
 									onValueChange={(value) =>
 										setCategory(value as TaskCategory)
 									}
+									disabled={isSubmitting}
 								>
 									<Select.Trigger id="task-category" variant="surface" />
 									<Select.Content>
@@ -126,6 +162,7 @@ export function PostTaskForm() {
 										min={1}
 										placeholder="250"
 										required
+										disabled={isSubmitting}
 									/>
 								</TextField.Root>
 							</FormField>
@@ -138,13 +175,20 @@ export function PostTaskForm() {
 									name="deadline"
 									type="date"
 									required
+									disabled={isSubmitting}
 								/>
 							</TextField.Root>
 						</FormField>
 
 						<div className="flex flex-wrap gap-2 pt-2">
-							<Button type="submit" size="2" variant="solid" color="blue">
-								Publish task
+							<Button
+								type="submit"
+								size="2"
+								variant="solid"
+								color="blue"
+								disabled={isSubmitting}
+							>
+								{isSubmitting ? "Publishing…" : "Publish task"}
 							</Button>
 							<Link href="/dashboard">
 								<Button type="button" size="2" variant="soft" color="gray">
