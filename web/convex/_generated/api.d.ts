@@ -11,9 +11,15 @@
 import type * as applications from "../applications.js";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as lib_applicationDto from "../lib/applicationDto.js";
+import type * as lib_applicationFields from "../lib/applicationFields.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_notificationHelpers from "../lib/notificationHelpers.js";
 import type * as lib_taskDto from "../lib/taskDto.js";
 import type * as lib_validators from "../lib/validators.js";
+import type * as migrations from "../migrations.js";
+import type * as notifications from "../notifications.js";
+import type * as profiles from "../profiles.js";
 import type * as seed from "../seed.js";
 import type * as tasks from "../tasks.js";
 
@@ -27,9 +33,15 @@ declare const fullApi: ApiFromModules<{
   applications: typeof applications;
   auth: typeof auth;
   http: typeof http;
+  "lib/applicationDto": typeof lib_applicationDto;
+  "lib/applicationFields": typeof lib_applicationFields;
   "lib/auth": typeof lib_auth;
+  "lib/notificationHelpers": typeof lib_notificationHelpers;
   "lib/taskDto": typeof lib_taskDto;
   "lib/validators": typeof lib_validators;
+  migrations: typeof migrations;
+  notifications: typeof notifications;
+  profiles: typeof profiles;
   seed: typeof seed;
   tasks: typeof tasks;
 }>;
