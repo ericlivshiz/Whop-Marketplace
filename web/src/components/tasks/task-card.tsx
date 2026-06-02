@@ -21,7 +21,15 @@ function CalendarIcon() {
 	);
 }
 
-export function TaskCard({ task }: { task: Task }) {
+export function TaskCard({
+	task,
+	showApplicantBadge = false,
+}: {
+	task: Task;
+	showApplicantBadge?: boolean;
+}) {
+	const applicantCount = task.applicants ?? 0;
+
 	return (
 		<Link href={`/tasks/${task.id}`} className="group block h-full">
 			<Card
@@ -31,7 +39,14 @@ export function TaskCard({ task }: { task: Task }) {
 			>
 				<div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
 					<div className="flex items-center justify-between gap-3">
-						<CategoryBadge category={task.category} />
+						<div className="flex flex-wrap items-center gap-2">
+							<CategoryBadge category={task.category} />
+							{showApplicantBadge && applicantCount > 0 ? (
+								<span className="rounded-full bg-blue-3 px-2 py-0.5 text-xs font-medium text-blue-11">
+									{applicantCount} applicant{applicantCount === 1 ? "" : "s"}
+								</span>
+							) : null}
+						</div>
 						<Text
 							size="3"
 							weight="medium"

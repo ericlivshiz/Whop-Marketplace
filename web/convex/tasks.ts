@@ -7,6 +7,7 @@ import {
 	getProfileByUserId,
 	requireAuth,
 } from "./lib/auth";
+import { createTaskPostedNotification } from "./lib/notificationHelpers";
 import { countApplicantsForTask, toTaskDto } from "./lib/taskDto";
 import { taskCategory, taskDetailValidator, taskValidator } from "./lib/validators";
 
@@ -148,7 +149,12 @@ export const listPostedByMe = query({
 			return [];
 		}
 
-		return tasks.map((task) => toTaskDto(task, profile));
+		const results = [];
+		for (const task of tasks) {
+			const applicantCount = await countApplicantsForTask(ctx, task._id);
+			results.push(toTaskDto(task, profile, applicantCount));
+		}
+		return results;
 	},
 });
 
@@ -171,7 +177,7 @@ export const create = mutation({
 		const deadline = validateDeadline(args.deadline);
 		const now = Date.now();
 
-		return await ctx.db.insert("tasks", {
+		const taskId = await ctx.db.insert("tasks", {
 			posterId: user._id,
 			title,
 			description,
@@ -181,5 +187,13 @@ export const create = mutation({
 			status: "open",
 			createdAt: now,
 		});
+
+		await createTaskPostedNotification(ctx, {
+			userId: user._id,
+			taskId,
+			createdAt: now,
+		});
+
+		return taskId;
 	},
 });

@@ -75,7 +75,11 @@ export function MyTasksView() {
 				) : (
 					<div className="grid gap-5 sm:grid-cols-2">
 						{tasks.map((task) => (
-							<TaskCard key={task.id} task={task} />
+							<TaskCard
+								key={task.id}
+								task={task}
+								showApplicantBadge={tab === "posted"}
+							/>
 						))}
 					</div>
 				)}

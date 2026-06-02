@@ -1,5 +1,6 @@
 "use client";
 
+import { NotificationBell } from "@/components/tasks/notification-bell";
 import { authClient } from "@/lib/auth-client";
 import { syncSignedOutSession } from "@/lib/auth-session";
 import { useAuthGuard } from "@/hooks/use-auth-guard";
@@ -74,6 +75,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 					</nav>
 
 					<div className="flex items-center gap-2 shrink-0">
+						<NotificationBell />
 						<Link href="/tasks/new" className="hidden md:block">
 							<Button size="2" variant="solid" color="blue">
 								Post task
