@@ -1,4 +1,6 @@
+import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { FrostedProviders } from "@/components/frosted-providers";
+import { getToken } from "@/lib/auth-server";
 import { WhopThemeScript } from "@whop/react/theme";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -19,11 +21,13 @@ export const metadata: Metadata = {
 	description: "Next.js app with Whop's Frosted UI design system",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const token = await getToken();
+
 	return (
 		<html
 			lang="en"
@@ -31,7 +35,9 @@ export default function RootLayout({
 		>
 			<body className="min-h-full">
 				<WhopThemeScript />
-				<FrostedProviders>{children}</FrostedProviders>
+				<ConvexClientProvider initialToken={token}>
+					<FrostedProviders>{children}</FrostedProviders>
+				</ConvexClientProvider>
 			</body>
 		</html>
 	);
