@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Whop Frosted UI App",
-	description: "Next.js app with Whop's Frosted UI design system",
+	title: "Whop Marketplace",
+	description: "Sign in or create an account",
 };
 
 export default async function RootLayout({
