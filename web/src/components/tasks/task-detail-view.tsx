@@ -1,7 +1,9 @@
 "use client";
 
 import { AppShell } from "@/components/tasks/app-shell";
+import { ApplyToTaskDialog } from "@/components/tasks/apply-to-task-dialog";
 import { CategoryBadge } from "@/components/tasks/category-badge";
+import { TaskApplicationsPanel } from "@/components/tasks/task-applications-panel";
 import { getCategoryLabel } from "@/lib/tasks/mock-data";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
@@ -14,7 +16,7 @@ import {
 	Spinner,
 	Text,
 } from "@whop/react/components";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { useState } from "react";
@@ -80,23 +82,8 @@ function UsersIcon() {
 
 export function TaskDetailView({ taskId }: { taskId: Id<"tasks"> }) {
 	const detail = useQuery(api.tasks.get, { taskId });
-	const applyToTask = useMutation(api.applications.apply);
-	const [applyError, setApplyError] = useState<string | null>(null);
-	const [isApplying, setIsApplying] = useState(false);
-
-	async function handleApply() {
-		setApplyError(null);
-		setIsApplying(true);
-		try {
-			await applyToTask({ taskId });
-		} catch (err) {
-			setApplyError(
-				err instanceof Error ? err.message : "Failed to apply",
-			);
-		} finally {
-			setIsApplying(false);
-		}
-	}
+	const [applyDialogOpen, setApplyDialogOpen] = useState(false);
+	const [justApplied, setJustApplied] = useState(false);
 
 	if (detail === undefined) {
 		return (
@@ -113,7 +100,12 @@ export function TaskDetailView({ taskId }: { taskId: Id<"tasks"> }) {
 	}
 
 	const { task, currentUserHasApplied, isOwnTask } = detail;
-	const applied = currentUserHasApplied;
+	const applied = currentUserHasApplied || justApplied;
+	const showApplicantCount = isOwnTask && task.applicants != null;
+
+	function handleApplySuccess() {
+		setJustApplied(true);
+	}
 
 	return (
 		<AppShell>
@@ -149,6 +141,8 @@ export function TaskDetailView({ taskId }: { taskId: Id<"tasks"> }) {
 								{task.description}
 							</Text>
 						</Card>
+
+						{isOwnTask ? <TaskApplicationsPanel taskId={taskId} /> : null}
 					</div>
 
 					<aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
@@ -176,18 +170,18 @@ export function TaskDetailView({ taskId }: { taskId: Id<"tasks"> }) {
 						</div>
 
 						<div
-							className={`grid gap-3 ${task.applicants != null ? "grid-cols-2" : "grid-cols-1"}`}
+							className={`grid gap-3 ${showApplicantCount ? "grid-cols-2" : "grid-cols-1"}`}
 						>
 							<StatTile
 								icon={<CalendarIcon />}
 								label="Deadline"
 								value={task.deadline}
 							/>
-							{task.applicants != null ? (
+							{showApplicantCount ? (
 								<StatTile
 									icon={<UsersIcon />}
 									label="Applicants"
-									value={task.applicants}
+									value={task.applicants ?? 0}
 								/>
 							) : null}
 						</div>
@@ -223,41 +217,57 @@ export function TaskDetailView({ taskId }: { taskId: Id<"tasks"> }) {
 								</div>
 							</div>
 
-							<div className="flex flex-col gap-2">
-								{applyError ? (
-									<Text size="1" color="red" className="text-center">
-										{applyError}
-									</Text>
-								) : null}
-								<Button
-									size="3"
-									variant="solid"
-									color="blue"
-									className="w-full"
-									disabled={
-										applied ||
-										isOwnTask ||
-										task.status !== "open" ||
-										isApplying
-									}
-									onClick={handleApply}
-								>
-									{applied
-										? "Application sent ✓"
-										: isOwnTask
-											? "Your task"
-											: isApplying
-												? "Applying…"
-												: "Apply to task"}
-								</Button>
-								<Text size="1" color="gray" className="text-center leading-relaxed">
-									Payments and escrow ship in a later release.
+							{isOwnTask ? (
+								<Text size="2" color="gray" className="text-center leading-relaxed">
+									This is your listing. Review applications in the panel
+									above.
 								</Text>
-							</div>
+							) : applied ? (
+								<div className="flex flex-col gap-2">
+									<Button
+										size="3"
+										variant="solid"
+										color="blue"
+										className="w-full"
+										disabled
+									>
+										Application sent ✓
+									</Button>
+									<Text size="1" color="gray" className="text-center leading-relaxed">
+										The poster has been notified of your application.
+									</Text>
+								</div>
+							) : (
+								<div className="flex flex-col gap-2">
+									<Button
+										size="3"
+										variant="solid"
+										color="blue"
+										className="w-full"
+										disabled={task.status !== "open"}
+										onClick={() => setApplyDialogOpen(true)}
+									>
+										Apply to task
+									</Button>
+									<Text size="1" color="gray" className="text-center leading-relaxed">
+										Opens a short application form for the poster.
+									</Text>
+								</div>
+							)}
 						</Card>
 					</aside>
 				</div>
 			</div>
+			{!isOwnTask && !applied ? (
+				<ApplyToTaskDialog
+					open={applyDialogOpen}
+					onOpenChange={setApplyDialogOpen}
+					taskId={taskId}
+					taskTitle={task.title}
+					budgetLabel={task.budgetLabel}
+					onSuccess={handleApplySuccess}
+				/>
+			) : null}
 		</AppShell>
 	);
 }
